@@ -18,7 +18,7 @@ const init = async (element) => {
     videoElement.style.cssText = 'position: absolute; top: 0; left: 0; z-index: 10'
 
     videoElement.width = window.innerWidth
-    videoElement.height = window.innerHeight - 200
+    videoElement.height = window.innerHeight - 150
 
     player = new shaka.Player()
     await player.attach(videoElement)

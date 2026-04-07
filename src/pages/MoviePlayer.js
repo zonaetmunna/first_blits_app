@@ -33,7 +33,7 @@ export default Blits.Component('MoviePlayer', {
         :alpha.transition="$controlsVisibility"
       >
         <Element x="60" y="50">
-          <Element w="60" h="60" color="#0087CEEB" rounded="16">
+          <Element w="60" h="60" color="#0087CEEB" rounded="16" @click="togglePlay">
             <Element y="14" x="14" w="32" h="32" :src="$playing ? 'assets/player/pause.png' : 'assets/player/play.png'" />
           </Element>
           <Element y="22" x="100" w="$progressLength" h="16" color="#ffffff80" rounded="8">
@@ -51,7 +51,7 @@ export default Blits.Component('MoviePlayer', {
   `,
   state() {
     return {
-      controlsVisibility: 0,
+      controlsVisibility: 1,
       progressLength: 1520,
       progress: 0,
       currentTime: '00:00',
@@ -94,19 +94,26 @@ export default Blits.Component('MoviePlayer', {
   },
   input: {
     space() {
-      this.play()
+      this.togglePlay()
+    },
+    left() {
+      this.seekBackward()
+    },
+    right() {
+      this.seekForward()
     },
     up() {
-      this.showControls(1)
+      this.increaseVolume()
     },
     down() {
-      this.showControls(0)
+      this.decreaseVolume()
+    },
+    enter() {
+      this.toggleMute()
     },
   },
   methods: {
-    play() {
-      this.showControls(1)
-      this.hideTimeout = this.$setTimeout(() => this.showControls(0), 3000)
+    togglePlay() {
       if (PlayerManager.state.playingState == true) {
         PlayerManager.pause()
         this.playing = false
@@ -116,9 +123,29 @@ export default Blits.Component('MoviePlayer', {
         this.playing = true
       }
     },
-    showControls(v) {
-      this.$clearTimeout(this.hideTimeout)
-      this.controlsVisibility = v
+    seekBackward() {
+      const currentTime = PlayerManager.getCurrentTime()
+      PlayerManager.seek(Math.max(0, currentTime - 10))
+    },
+    seekForward() {
+      const currentTime = PlayerManager.getCurrentTime()
+      const duration = PlayerManager.getVideoDuration()
+      PlayerManager.seek(Math.min(duration, currentTime + 10))
+    },
+    increaseVolume() {
+      const currentVolume = PlayerManager.getVolume()
+      PlayerManager.setVolume(Math.min(1, currentVolume + 0.1))
+    },
+    decreaseVolume() {
+      const currentVolume = PlayerManager.getVolume()
+      PlayerManager.setVolume(Math.max(0, currentVolume - 0.1))
+    },
+    toggleMute() {
+      if (PlayerManager.isMuted()) {
+        PlayerManager.unmute()
+      } else {
+        PlayerManager.mute()
+      }
     },
   },
 })
